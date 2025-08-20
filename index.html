@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ZUFC Budget App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+
+    <!-- nunito font -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      * {
+        font-family: "Nunito", sans-serif;
+      }
+      .active-tab {
+        background-color: #facc15; /* Tailwind yellow-300 */
+        color: black;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50 text-gray-800 font-sans">
+    <!-- Navbar -->
+    <nav
+      class="bg-gradient-to-r from-red-900 to-red-950 text-white px-6 py-4 shadow-md"
+    >
+      <div class="flex justify-between items-center">
+        <!-- Logo -->
+        <h1 class="text-2xl font-bold flex items-center gap-2">
+          <img src="./assets/images/logo.jpg" alt="ZUFC Logo" class="h-8" />
+          ZUFC Budget App
+        </h1>
+
+        <!-- Hamburger button (mobile) -->
+        <button
+          id="menu-toggle"
+          class="md:hidden text-white focus:outline-none text-2xl"
+        >
+          <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <!-- Desktop menu -->
+        <div class="hidden md:flex space-x-2 font-medium">
+          <button
+            onclick="showTab('dashboard')"
+            class="px-4 py-2 border rounded-lg hover:bg-yellow-300 hover:text-black transition"
+          >
+            Dashboard
+          </button>
+          <button
+            onclick="showTab('members')"
+            class="px-4 py-2 border rounded-lg hover:bg-yellow-300 hover:text-black transition"
+          >
+            Members
+          </button>
+          <button
+            onclick="showTab('payments')"
+            class="px-4 py-2 border rounded-lg hover:bg-yellow-300 hover:text-black transition"
+          >
+            Payments
+          </button>
+          <button
+            onclick="showTab('expenses')"
+            class="px-4 py-2 border rounded-lg hover:bg-yellow-300 hover:text-black transition"
+          >
+            Expenses
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile dropdown menu -->
+      <div
+        id="mobile-menu"
+        class="hidden flex-col mt-4 font-medium md:hidden space-y-2"
+      >
+        <button
+          onclick="selectMobileItem('dashboard')"
+          class="w-full text-left px-4 py-2 border rounded-lg hover:bg-yellow-300 hover:text-black transition"
+        >
+          Dashboard
+        </button>
+        <button
+          onclick="selectMobileItem('members')"
+          class="w-full text-left px-4 py-2 border rounded-lg hover:bg-yellow-300 hover:text-black transition"
+        >
+          Members
+        </button>
+        <button
+          onclick="selectMobileItem('payments')"
+          class="w-full text-left px-4 py-2 border rounded-lg hover:bg-yellow-300 hover:text-black transition"
+        >
+          Payments
+        </button>
+        <button
+          onclick="selectMobileItem('expenses')"
+          class="w-full text-left px-4 py-2 border rounded-lg hover:bg-yellow-300 hover:text-black transition"
+        >
+          Expenses
+        </button>
+      </div>
+    </nav>
+
+    <!-- Dashboard -->
+    <section id="dashboard" class="p-6">
+      <div class="grid md:grid-cols-4 gap-6">
+        <div
+          class="bg-white rounded-2xl shadow-lg p-6 text-center hover:shadow-xl transition"
+        >
+          <i class="fa-solid fa-users text-4xl text-blue-600 mb-3"></i>
+          <h2 class="text-lg font-semibold">Total Members</h2>
+          <p id="totalMembers" class="text-3xl font-bold">0</p>
+        </div>
+        <div
+          class="bg-white rounded-2xl shadow-lg p-6 text-center hover:shadow-xl transition"
+        >
+          <i
+            class="fa-solid fa-hand-holding-dollar text-4xl text-green-600 mb-3"
+          ></i>
+          <h2 class="text-lg font-semibold">Payments</h2>
+          <p id="totalPayments" class="text-3xl font-bold">0</p>
+        </div>
+        <div
+          class="bg-white rounded-2xl shadow-lg p-6 text-center hover:shadow-xl transition"
+        >
+          <i
+            class="fa-solid fa-file-invoice-dollar text-4xl text-red-600 mb-3"
+          ></i>
+          <h2 class="text-lg font-semibold">Expenses</h2>
+          <p id="totalExpenses" class="text-3xl font-bold">0</p>
+        </div>
+        <div
+          class="bg-white rounded-2xl shadow-lg p-6 text-center hover:shadow-xl transition"
+        >
+          <i
+            class="fa-solid fa-scale-balanced text-4xl text-purple-600 mb-3"
+          ></i>
+          <h2 class="text-lg font-semibold">Balance</h2>
+          <p id="totalBalance" class="text-3xl font-bold">0</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Members -->
+    <section id="members" class="p-6 hidden">
+      <div class="flex justify-between mb-4">
+        <h2 class="text-xl font-bold flex items-center gap-2">
+          <i class="fa-solid fa-users"></i> Members
+        </h2>
+        <button
+          onclick="openMemberModal()"
+          class="bg-blue-600 hover:bg-blue-700 transition text-white px-4 py-2 rounded-lg shadow"
+        >
+          <i class="fa fa-plus"></i> Add Member
+        </button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full bg-white rounded-xl shadow text-center">
+          <thead class="bg-gray-100 text-gray-700">
+            <tr>
+              <th class="py-3 px-3">#</th>
+              <th class="py-3 px-3">Name</th>
+              <th class="py-3 px-3">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="membersTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Payments -->
+    <section id="payments" class="p-6 hidden">
+      <div class="flex justify-between mb-4">
+        <h2 class="text-xl font-bold flex items-center gap-2">
+          <i class="fa-solid fa-hand-holding-dollar"></i> Payments
+        </h2>
+        <button
+          onclick="openPaymentModal()"
+          class="bg-green-600 hover:bg-green-700 transition text-white px-4 py-2 rounded-lg shadow"
+        >
+          <i class="fa fa-plus"></i> Add Payment
+        </button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full bg-white rounded-xl shadow text-center">
+          <thead class="bg-gray-100 text-gray-700">
+            <tr>
+              <th class="py-3 px-3">#</th>
+              <th class="py-3 px-3">Member</th>
+              <th class="py-3 px-3">Amount (PKR)</th>
+              <th class="py-3 px-3">Date</th>
+              <th class="py-3 px-3">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="paymentsTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Expenses -->
+    <section id="expenses" class="p-6 hidden">
+      <div class="flex justify-between mb-4">
+        <h2 class="text-xl font-bold flex items-center gap-2">
+          <i class="fa-solid fa-file-invoice-dollar"></i> Expenses
+        </h2>
+        <button
+          onclick="openExpenseModal()"
+          class="bg-red-600 hover:bg-red-700 transition text-white px-4 py-2 rounded-lg shadow"
+        >
+          <i class="fa fa-plus"></i> Add Expense
+        </button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full bg-white rounded-xl shadow text-center">
+          <thead class="bg-gray-100 text-gray-700">
+            <tr>
+              <th class="py-3 px-3">#</th>
+              <th class="py-3 px-3">Summary</th>
+              <th class="py-3 px-3">Amount (PKR)</th>
+              <th class="py-3 px-3">Date</th>
+              <th class="py-3 px-3">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="expensesTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Modals -->
+    <div id="modalContainer"></div>
+
+    <!-- Toasts -->
+    <div id="toastContainer" class="fixed top-5 right-5 space-y-2 z-50"></div>
+
+    <!-- Loading -->
+    <div
+      id="loadingOverlay"
+      class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+    >
+      <div
+        class="animate-spin rounded-full h-16 w-16 border-4 border-white border-t-transparent"
+      ></div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
