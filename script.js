@@ -175,25 +175,31 @@ function deleteMember(i) {
 function renderPayments() {
   const tbody = document.getElementById("paymentsTable");
   tbody.innerHTML = "";
-  data.payments.forEach((p, i) => {
-    const member = data.members[p.member_id]?.name || "Unknown";
-    const createdAt = p.created_at ? new Date(p.created_at).toLocaleDateString("en-US", {
-      month: "long",
-      day: "numeric",
-      year: "numeric"
-    }) : "N/A";
-    tbody.innerHTML += `
+  // Sort payments by created_at in descending order
+  data.payments
+    .slice()
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    .forEach((p, i) => {
+      const member = data.members[p.member_id]?.name || "Unknown";
+      const createdAt = p.created_at
+        ? new Date(p.created_at).toLocaleDateString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+          })
+        : "N/A";
+      tbody.innerHTML += `
       <tr class="hover:bg-gray-50 transition">
         <td class="py-3">${i + 1}</td>
         <td>${member}</td>
         <td>${p.amount}</td>
         <td>${createdAt}</td>
         <td>
-          <button onclick="editPayment(${i})" class="text-blue-600 hover:text-blue-800"><i class="fa fa-edit"></i></button>
-          <button onclick="deletePayment(${i})" class="text-red-600 hover:text-red-800 ml-2"><i class="fa fa-trash"></i></button>
+          <button onclick="editPayment(${data.payments.indexOf(p)})" class="text-blue-600 hover:text-blue-800"><i class="fa fa-edit"></i></button>
+          <button onclick="deletePayment(${data.payments.indexOf(p)})" class="text-red-600 hover:text-red-800 ml-2"><i class="fa fa-trash"></i></button>
         </td>
       </tr>`;
-  });
+    });
 }
 
 function openPaymentModal() {
@@ -259,24 +265,30 @@ function deletePayment(i) {
 function renderExpenses() {
   const tbody = document.getElementById("expensesTable");
   tbody.innerHTML = "";
-  data.expenses.forEach((e, i) => {
-    const createdAt = e.created_at ? new Date(e.created_at).toLocaleDateString("en-US", {
-      month: "long",
-      day: "numeric",
-      year: "numeric"
-    }) : "N/A";
-    tbody.innerHTML += `
+  // Sort expenses by created_at in descending order
+  data.expenses
+    .slice()
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    .forEach((e, i) => {
+      const createdAt = e.created_at
+        ? new Date(e.created_at).toLocaleDateString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+          })
+        : "N/A";
+      tbody.innerHTML += `
       <tr class="hover:bg-gray-50 transition">
         <td class="py-3">${i + 1}</td>
         <td>${e.summary}</td>
         <td>${e.amount}</td>
         <td>${createdAt}</td>
         <td>
-          <button onclick="editExpense(${i})" class="text-blue-600 hover:text-blue-800"><i class="fa fa-edit"></i></button>
-          <button onclick="deleteExpense(${i})" class="text-red-600 hover:text-red-800 ml-2"><i class="fa fa-trash"></i></button>
+          <button onclick="editExpense(${data.expenses.indexOf(e)})" class="text-blue-600 hover:text-blue-800"><i class="fa fa-edit"></i></button>
+          <button onclick="deleteExpense(${data.expenses.indexOf(e)})" class="text-red-600 hover:text-red-800 ml-2"><i class="fa fa-trash"></i></button>
         </td>
       </tr>`;
-  });
+    });
 }
 
 function openExpenseModal() {
