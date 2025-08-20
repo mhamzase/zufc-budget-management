@@ -4,6 +4,10 @@ const baseUrl = `https://getpantry.cloud/apiv1/pantry/${pantryId}/basket/appdata
 let data = { members: [], payments: [], expenses: [] };
 let editType = null,
   editId = null;
+const itemsPerPage = 10;
+let membersCurrentPage = 1;
+let paymentsCurrentPage = 1;
+let expensesCurrentPage = 1;
 
 // ----------------- UI HELPERS -----------------
 function showLoading(show) {
@@ -117,16 +121,22 @@ function updateDashboard() {
 function renderMembers() {
   const tbody = document.getElementById("membersTable");
   tbody.innerHTML = "";
-  data.members.forEach((m, i) => {
+  const start = (membersCurrentPage - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  data.members.slice(start, end).forEach((m, i) => {
     tbody.innerHTML += `
       <tr class="hover:bg-gray-50 transition">
-        <td class="py-3">${i + 1}</td>
+        <td class="py-3">${start + i + 1}</td>
         <td>${m.name}</td>
         <td>
-          <button onclick="editMember(${i})" class="text-blue-600 hover:text-blue-800"><i class="fa fa-edit"></i></button>
-          <button onclick="deleteMember(${i})" class="text-red-600 hover:text-red-800 ml-2"><i class="fa fa-trash"></i></button>
+          <button onclick="editMember(${start + i})" class="text-blue-600 hover:text-blue-800"><i class="fa fa-edit"></i></button>
+          <button onclick="deleteMember(${start + i})" class="text-red-600 hover:text-red-800 ml-2"><i class="fa fa-trash"></i></button>
         </td>
       </tr>`;
+  });
+  renderPagination("membersPagination", data.members.length, membersCurrentPage, (page) => {
+    membersCurrentPage = page;
+    renderMembers();
   });
 }
 
@@ -175,10 +185,12 @@ function deleteMember(i) {
 function renderPayments() {
   const tbody = document.getElementById("paymentsTable");
   tbody.innerHTML = "";
-  // Sort payments by created_at in descending order
+  const start = (paymentsCurrentPage - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
   data.payments
     .slice()
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    .slice(start, end)
     .forEach((p, i) => {
       const member = data.members[p.member_id]?.name || "Unknown";
       const createdAt = p.created_at
@@ -188,18 +200,23 @@ function renderPayments() {
             year: "numeric",
           })
         : "N/A";
+      const originalIndex = data.payments.indexOf(p);
       tbody.innerHTML += `
       <tr class="hover:bg-gray-50 transition">
-        <td class="py-3">${i + 1}</td>
+        <td class="py-3">${start + i + 1}</td>
         <td>${member}</td>
         <td>${p.amount}</td>
         <td>${createdAt}</td>
         <td>
-          <button onclick="editPayment(${data.payments.indexOf(p)})" class="text-blue-600 hover:text-blue-800"><i class="fa fa-edit"></i></button>
-          <button onclick="deletePayment(${data.payments.indexOf(p)})" class="text-red-600 hover:text-red-800 ml-2"><i class="fa fa-trash"></i></button>
+          <button onclick="editPayment(${originalIndex})" class="text-blue-600 hover:text-blue-800"><i class="fa fa-edit"></i></button>
+          <button onclick="deletePayment(${originalIndex})" class="text-red-600 hover:text-red-800 ml-2"><i class="fa fa-trash"></i></button>
         </td>
       </tr>`;
     });
+  renderPagination("paymentsPagination", data.payments.length, paymentsCurrentPage, (page) => {
+    paymentsCurrentPage = page;
+    renderPayments();
+  });
 }
 
 function openPaymentModal() {
@@ -265,10 +282,12 @@ function deletePayment(i) {
 function renderExpenses() {
   const tbody = document.getElementById("expensesTable");
   tbody.innerHTML = "";
-  // Sort expenses by created_at in descending order
+  const start = (expensesCurrentPage - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
   data.expenses
     .slice()
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    .slice(start, end)
     .forEach((e, i) => {
       const createdAt = e.created_at
         ? new Date(e.created_at).toLocaleDateString("en-US", {
@@ -277,18 +296,23 @@ function renderExpenses() {
             year: "numeric",
           })
         : "N/A";
+      const originalIndex = data.expenses.indexOf(e);
       tbody.innerHTML += `
       <tr class="hover:bg-gray-50 transition">
-        <td class="py-3">${i + 1}</td>
+        <td class="py-3">${start + i + 1}</td>
         <td>${e.summary}</td>
         <td>${e.amount}</td>
         <td>${createdAt}</td>
         <td>
-          <button onclick="editExpense(${data.expenses.indexOf(e)})" class="text-blue-600 hover:text-blue-800"><i class="fa fa-edit"></i></button>
-          <button onclick="deleteExpense(${data.expenses.indexOf(e)})" class="text-red-600 hover:text-red-800 ml-2"><i class="fa fa-trash"></i></button>
+          <button onclick="editExpense(${originalIndex})" class="text-blue-600 hover:text-blue-800"><i class="fa fa-edit"></i></button>
+          <button onclick="deleteExpense(${originalIndex})" class="text-red-600 hover:text-red-800 ml-2"><i class="fa fa-trash"></i></button>
         </td>
       </tr>`;
     });
+  renderPagination("expensesPagination", data.expenses.length, expensesCurrentPage, (page) => {
+    expensesCurrentPage = page;
+    renderExpenses();
+  });
 }
 
 function openExpenseModal() {
@@ -374,4 +398,35 @@ function selectMobileItem(tab) {
 
 function formatAmount(amount) {
   return Number(amount).toLocaleString("en-US"); // e.g., 30000 -> "30,000"
+}
+
+function renderPagination(containerId, totalItems, currentPage, onPageChange) {
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
+
+  // Previous button
+  const prevButton = document.createElement("button");
+  prevButton.className = `px-4 py-2 border rounded-lg ${currentPage === 1 ? "bg-gray-200 cursor-not-allowed" : "hover:bg-yellow-300 hover:text-black transition"}`;
+  prevButton.innerText = "Previous";
+  prevButton.disabled = currentPage === 1;
+  prevButton.onclick = () => onPageChange(currentPage - 1);
+  container.appendChild(prevButton);
+
+  // Page numbers
+  for (let i = 1; i <= totalPages; i++) {
+    const pageButton = document.createElement("button");
+    pageButton.className = `px-4 py-2 border rounded-lg ${i === currentPage ? "bg-red-800 text-white" : "hover:border-red-800 border-2 hover:text-black transition"}`;
+    pageButton.innerText = i;
+    pageButton.onclick = () => onPageChange(i);
+    container.appendChild(pageButton);
+  }
+
+  // Next button
+  const nextButton = document.createElement("button");
+  nextButton.className = `px-4 py-2 border rounded-lg ${currentPage === totalPages ? "bg-gray-200 cursor-not-allowed" : "hover:bg-yellow-300 hover:text-black transition"}`;
+  nextButton.innerText = "Next";
+  nextButton.disabled = currentPage === totalPages;
+  nextButton.onclick = () => onPageChange(currentPage + 1);
+  container.appendChild(nextButton);
 }
